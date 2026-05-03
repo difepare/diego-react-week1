@@ -1,18 +1,8 @@
-// QuoteBox.jsx
-// 1. Recibimos 'frase' por props usando destructuring { frase }
 function QuoteBox({ frase }) {
   return (
-    <div style={{
-      color: 'white',
-      fontSize: '2rem',
-      fontWeight: 'bold',
-      textAlign: 'center',
-      marginBottom: '30px',
-      minHeight: '100px'
-    }}>
+    <div className="text-white text-4xl font-bold text-center mb-8 max-w-2xl px-4">
       "{frase}"
     </div>
   )
 }
-
-export default QuoteBox
+export default QuoteBox  // ← Verifica que también esté

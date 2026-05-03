@@ -1,22 +1,12 @@
-// Button.jsx
-// 1. Recibimos onClick y texto como props
 function Button({ onClick, texto }) {
   return (
     <button
       onClick={onClick}
-      style={{
-        padding: '12px 24px',
-        fontSize: '1.1rem',
-        cursor: 'pointer',
-        backgroundColor: '#61dafb',
-        border: 'none',
-        borderRadius: '8px',
-        fontWeight: 'bold'
-      }}
+      className="px-6 py-3 bg-sky-400 text-slate-900 font-bold rounded-lg hover:bg-sky-300 transition-colors"
     >
       {texto}
     </button>
   )
 }
 
-export default Button
+export default Button  // ← Esta línea probablemente te falta

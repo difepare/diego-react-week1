@@ -1,8 +1,10 @@
 // App.jsx
+
+import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import QuoteBox from './QuoteBox' // Importamos los componentes hijos
-import Button from './Button'
-import './App.css'
+//import QuoteBox from './QuoteBox' // Importamos los componentes hijos
+//import Button from './Button'
+//import './App.css'
 
 function App() {
   // 1. Array con frases de devs de Toronto
@@ -42,26 +44,28 @@ function App() {
   }, [fraseActual]) // Dependencia: solo se ejecuta si fraseActual cambia
 
   return (
-    <div style={{
-      backgroundColor: bgColor,
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      transition: 'background-color 0.5s ease' // Animación suave
-    }}>
-      <h2 style={{ color: 'white', marginBottom: '20px' }}>
-        Generador de Frases Dev Toronto 🇨🇦
-      </h2>
-
-      {/* 6. Le pasamos la frase al componente hijo como prop */}
-      <QuoteBox frase={fraseActual} />
-
-      {/* 7. Le pasamos la función y el texto al botón como props */}
-      <Button onClick={generarNuevaFrase} texto="Nueva frase" />
-    </div>
-  )
+  <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center" style={{ backgroundColor: bgColor }}>
+    <h2 className="text-white text-3xl font-bold mb-8">
+      Generador de Frases Dev Toronto 🇨🇦
+    </h2>
+    
+    <p className="text-white text-2xl mb-4">{fraseActual}</p>
+    
+    <button 
+      onClick={generarNuevaFrase}
+      className="px-6 py-3 bg-blue-500 text-white font-bold rounded-lg"
+    >
+      Nueva frase
+    </button>
+    
+    <Link 
+      to="/about"
+      className="mt-6 text-sky-400 underline hover:text-sky-300"
+    >
+      ¿Quién hizo esto?
+    </Link>
+  </div>
+)
 }
 
 export default App
