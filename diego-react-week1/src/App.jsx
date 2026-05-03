@@ -1,53 +1,65 @@
 // App.jsx
-// 1. Importamos useState: el hook para guardar datos que cambian
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import QuoteBox from './QuoteBox' // Importamos los componentes hijos
+import Button from './Button'
 import './App.css'
 
 function App() {
-  // 2. Creamos una "memoria" para el componente
-  //    nombre = valor actual → "Diego"
-  //    setNombre = función para cambiarlo
-  //    useState("Diego") = valor inicial
-  const [nombre, setNombre] = useState("Diego")
-  const [contador, setContador] = useState(0)
+  // 1. Array con frases de devs de Toronto
+  const frases = [
+    "Debuggear en producción con un café de Tim Hortons",
+    "Mi código funciona en mi máquina y en la CN Tower",
+    "Commits en inglés, bugs en spanglish",
+    "Esperando el streetcar mientras arreglo este bug",
+    "-40°C afuera, pero mi laptop está más hot por este loop infinito"
+  ]
 
-  // 3. Función que se ejecuta al hacer clic
-  const sumarClic = () => {
-    // IMPORTANTE: Nunca hagas contador = contador + 1
-    // Siempre usa la función set
-    setContador(contador + 1)
+  const colores = ['#0d1117', '#0d47a1', '#b71c1c', '#1b5e20', '#4a148c']
+
+  // 2. useState para la frase actual. Inicia con la primera del array
+  const [fraseActual, setFraseActual] = useState(frases[0])
+  // 3. useState para el color de fondo
+  const [bgColor, setBgColor] = useState(colores[0])
+
+  // 4. Función que se ejecuta al hacer clic en el botón
+  const generarNuevaFrase = () => {
+    // Elegimos un índice random del array de frases
+    const indiceRandom = Math.floor(Math.random() * frases.length)
+    // Actualizamos el state con la nueva frase
+    setFraseActual(frases[indiceRandom])
   }
 
-  // 4. Esto es JSX: parece HTML pero es JavaScript
-  //    Las llaves {} nos dejan meter variables de JS
+  // 5. useEffect: se ejecuta cuando 'fraseActual' cambia
+  useEffect(() => {
+    // Elegimos un color random cada vez que cambia la frase
+    const colorRandom = colores[Math.floor(Math.random() * colores.length)]
+    setBgColor(colorRandom)
+
+    // Bonus del Día 5: cambiamos el título de la pestaña
+    document.title = `Dev Quote: ${fraseActual}`
+
+    console.log('Nueva frase mostrada:', fraseActual)
+  }, [fraseActual]) // Dependencia: solo se ejecuta si fraseActual cambia
+
   return (
-    <div className="card">
-      <h1>Hola {nombre} desde Toronto! 👋</h1>
-      <p>Has hecho clic {contador} veces</p>
-      
-      {/* onClick ejecuta la función sumarClic */}
-      <button onClick={sumarClic}>
-        Suma +1
-      </button>
+    <div style={{
+      backgroundColor: bgColor,
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      transition: 'background-color 0.5s ease' // Animación suave
+    }}>
+      <h2 style={{ color: 'white', marginBottom: '20px' }}>
+        Generador de Frases Dev Toronto 🇨🇦
+      </h2>
 
-      <hr style={{margin: '20px 0'}} />
+      {/* 6. Le pasamos la frase al componente hijo como prop */}
+      <QuoteBox frase={fraseActual} />
 
-      {/* Input controlado: el valor viene de useState */}
-      {/* Input que ya tienes */}
-<input
-  type="text"
-  value={nombre}
-  onChange={(e) => setNombre(e.target.value)}
-  placeholder="Cambia tu nombre"
-/>
-
-{/* Agrega esto nuevo */}
-<button
-  onClick={() => setContador(0)}
-  style={{marginTop: '10px', marginLeft: '10px'}}
->
-  Reset
-</button>
+      {/* 7. Le pasamos la función y el texto al botón como props */}
+      <Button onClick={generarNuevaFrase} texto="Nueva frase" />
     </div>
   )
 }
