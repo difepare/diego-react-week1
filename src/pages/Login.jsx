@@ -2,10 +2,13 @@ import { supabase } from '../supabaseClient'
 
 export default function Login() {
   async function signInWithGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-    })
-  }
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://diego-react-week1-git-main-difepares-projects.vercel.app/dashboard'
+    }
+  })
+}
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-8">
