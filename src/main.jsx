@@ -17,6 +17,7 @@ function Layout() {
   useEffect(() => {
     // 1. Revisa si ya hay sesión al cargar
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('SESSION AL CARGAR:', session)
       setSession(session)
     })
 

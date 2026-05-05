@@ -3,10 +3,9 @@ import { supabase } from '../supabaseClient'
 export default function Login() {
   async function signInWithGoogle() {
   await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: 'https://diego-react-week1-git-main-difepares-projects.vercel.app/dashboard'
-    }
+    provider: 'google'
+    
+      
   })
 }
 
