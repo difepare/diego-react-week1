@@ -1,3 +1,4 @@
+import Posts from './pages/Posts.jsx'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
@@ -10,12 +11,13 @@ function Layout() {
   return (
     <>
       <nav>
-        <Link to="/">Home</Link> | <Link to="/about">About</Link> | <Link to="/contact">Contact</Link>
+        <Link to="/">Home</Link> | <Link to="/about">About</Link> | <Link to="/contact">Contact</Link> | <Link to="/posts">Posts</Link>
       </nav>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/posts" element={<Posts />} />
       </Routes>
     </>
   )
