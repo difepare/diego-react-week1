@@ -14,16 +14,16 @@ export default function Dashboard() {
   }, [])
 
   async function getProfile() {
-    const { data: { user } = await supabase.auth.getUser()
-    
-    if (!user) {
-      navigate('/login')
-    } else {
-      setUser(user)
-      getPosts(user.email)
-    }
-    setLoading(false)
+  const { data: { user } = await supabase.auth.getUser()} // <- Con } bien puesto
+  
+  if (!user) {
+    navigate('/login')
+  } else {
+    setUser(user)
+    getPosts(user.email)
   }
+  setLoading(false)
+}
 
   async function getPosts(email) {
     const { data, error } = await supabase
