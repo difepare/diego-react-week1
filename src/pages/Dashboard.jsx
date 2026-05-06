@@ -14,7 +14,7 @@ export default function Dashboard() {
   }, [])
 
   async function getProfile() {
-  const { data: { user } = await supabase.auth.getUser()} // <- Con } bien puesto
+  const { data: { user } } = await supabase.auth.getUser() // <- Con } bien puesto
   
   if (!user) {
     navigate('/login')
