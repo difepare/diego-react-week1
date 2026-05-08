@@ -1,18 +1,22 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Home from './pages/Home' // ← NUEVO
+import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home' // ← DEJA SOLO ESTA
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
-// ... otros imports
+import About from './pages/About'
+import Contact from './pages/Contact'
+import Posts from './pages/Posts'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} /> {/* ← CAMBIA ESTO */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/login" element={<Login />} />
-        {/* ... otras rutas */}
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/posts" element={<Posts />} />
+    </Routes>
   )
 }
+
+export default App

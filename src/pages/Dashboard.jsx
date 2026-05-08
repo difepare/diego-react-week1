@@ -1,132 +1,134 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../supabaseClient'
+import { supabase } from '../supabaseClient' // ← ESTA LÍNEA FALTABA
 import { useNavigate } from 'react-router-dom'
 
 export default function Dashboard() {
   const [user, setUser] = useState(null)
-  const [posts, setPosts] = useState([])
-  const [newPost, setNewPost] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true) // ← ESTA LÍNEA FALTABA
+  const [content, setContent] = useState('')
+  const [file, setFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
-    getProfile()
-  }, [])
+    async function getUser() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
 
-  async function getProfile() {
-  const { data: { user } } = await supabase.auth.getUser() // <- Con } bien puesto
-  
-  if (!user) {
-    navigate('/login')
-  } else {
-    setUser(user)
-    getPosts(user.email)
+        if (error) throw error
+
+        if (!session) {
+          navigate('/login') // Si no hay sesión, pa' login
+          return
+        }
+
+        setUser(session.user)
+        console.log('USUARIO EN DASHBOARD:', session.user.email)
+      } catch (err) {
+        console.error('Error en Dashboard:', err)
+      } finally {
+        setLoading(false) // ← CLAVE: Siempre apaga el loading
+      }
+    }
+
+    getUser()
+  }, [navigate])
+
+  async function handleSubmit(e) {
+  e.preventDefault()
+  if (!content &&!file) {
+    alert('Escribe algo o sube una foto')
+    return
   }
-  setLoading(false)
-}
 
-  async function getPosts(email) {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('user_id', email)
-      .order('created_at', { ascending: false })
-    
-    if (!error) setPosts(data || [])
-  }
+  setUploading(true)
 
-  async function createPost(e) {
-    e.preventDefault()
-    if (!newPost.trim()) return
+  try {
+    let image_url = null
 
+    // 1. SUBIR FOTO A STORAGE SI EXISTE
+    if (file) {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`
+      const filePath = `${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+       .from('report-photos')
+       .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      // 2. OBTENER URL PÚBLICA
+      const { data } = supabase.storage
+       .from('report-photos')
+       .getPublicUrl(filePath)
+
+      image_url = data.publicUrl
+      console.log('FOTO SUBIDA:', image_url)
+    }
+
+    // 3. INSERTAR POST CON O SIN FOTO
     const { error } = await supabase
-      .from('posts')
-      .insert({ 
-        user_id: user.email, 
-        content: newPost 
+     .from('public_posts')
+     .insert({
+        user_id: user.id,
+        user_name: user.user_metadata.full_name || user.email,
+        user_avatar: user.user_metadata.avatar_url,
+        content: content,
+        image_url: image_url // ← NULL si no hay foto, URL si sí hay
       })
 
-    if (!error) {
-      setNewPost('')
-      getPosts(user.email) // Recarga la lista
-    }
-  }
+    if (error) throw error
 
-  async function signOut() {
-    await supabase.auth.signOut()
-    navigate('/login')
-  }
+    alert('¡Reporte publicado con foto!')
+    setContent('')
+    setFile(null)
+    navigate('/') // ← Te lleva al Home a ver tu post
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-      Cargando tu mundo...
-    </div>
-  )
+  } catch (error) {
+    alert('Error: ' + error.message)
+    console.error(error)
+  } finally {
+    setUploading(false)
+  }
+}
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-gray-600">Cargando Dashboard...</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="max-w-2xl mx-auto">
-        
-        {/* HEADER CON TU FOTO */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <img 
-              src={user.user_metadata.avatar_url} 
-              className="w-16 h-16 rounded-full border-2 border-blue-500" 
-            />
-            <div>
-              <h1 className="text-2xl font-bold">Hola, {user.user_metadata.full_name}</h1>
-              <p className="text-gray-400">{user.email}</p>
-            </div>
-          </div>
-          <button 
-            onClick={signOut} 
-            className="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700"
-          >
-            Salir
-          </button>
-        </div>
+    <div className="max-w-2xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      <p className="mb-4">Hola, {user?.user_metadata?.full_name || user?.email}</p>
 
-        {/* CAJA PARA ESCRIBIR RECUERDOS */}
-        <form onSubmit={createPost} className="mb-8">
-          <textarea
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            placeholder="¿Qué quieres recordar hoy, Ing. del Flow?"
-            className="w-full bg-gray-800 border-gray-700 rounded-lg p-4 mb-3 text-white focus:border-blue-500 outline-none"
-            rows="3"
-          />
-          <button 
-            type="submit" 
-            className="bg-blue-600 px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold w-full"
-          >
-            Guardar recuerdo en la nube ☁️
-          </button>
-        </form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Reporta un hueco, semáforo dañado, basura..."
+          className="w-full border p-3 rounded-lg h-32"
+        />
 
-        {/* LISTA DE RECUERDOS */}
-        <h2 className="text-xl font-bold mb-4">Tus recuerdos guardados:</h2>
-        <div className="space-y-3">
-          {posts.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">
-              Aún no tienes recuerdos. ¡Escribe el primero arriba!
-            </p>
-          ) : (
-            posts.map((post) => (
-              <div key={post.id} className="bg-gray-800 p-4 rounded-lg border-gray-700">
-                <p className="text-lg">{post.content}</p>
-                <p className="text-xs text-gray-500 mt-2">
-                  {new Date(post.created_at).toLocaleString('es-CO', { 
-                    dateStyle: 'medium', 
-                    timeStyle: 'short' 
-                  })}
-                </p>
-              </div>
-            ))
-          )}
-        </div>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setFile(e.target.files[0])}
+          className="w-full"
+        />
 
-      </div>
+        <button
+          type="submit"
+          disabled={uploading}
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg disabled:bg-gray-400"
+        >
+          {uploading? 'Publicando...' : 'Publicar Reporte'}
+        </button>
+      </form>
     </div>
   )
 }
